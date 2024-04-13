@@ -1,19 +1,37 @@
 import { useFormik } from 'formik';
 import { Pressable, Text, TextInput, View } from 'react-native';
+import { useNavigate } from 'react-router-native';
 import * as yup from 'yup';
+import useSignIn from '../../hooks/useSignIn';
 import theme from '../../theme';
 
 const validationSchema = yup.object().shape({
-  account: yup.string().required('Account is required'),
+  username: yup.string().required('Username is required'),
   password: yup.string().required('Password is required'),
 });
 
 const initialValues = {
-  account: '',
+  username: '',
   password: '',
 };
 
 const LoginForm = () => {
+  const [signIn] = useSignIn();
+  const navigate = useNavigate();
+
+  const onSubmit = async (values) => {
+    const { username, password } = values;
+
+    try {
+      const { data } = await signIn({ username, password });
+      console.log(data);
+
+      navigate('/');
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const formik = useFormik({
     initialValues,
     validationSchema,
@@ -36,13 +54,6 @@ const LoginForm = () => {
     return inlineStyleInput;
   };
 
-  const onSubmit = (values) => {
-    if (formik.errors.account || formik.errors.password) {
-      return;
-    }
-    console.log(values);
-  };
-
   return (
     <View
       style={{
@@ -53,13 +64,13 @@ const LoginForm = () => {
       }}
     >
       <TextInput
-        style={responsiveStyleInput(formik.errors.account)}
-        placeholder="type account"
-        value={formik.values.account}
-        onChangeText={formik.handleChange('account')}
+        style={responsiveStyleInput(formik.errors.username)}
+        placeholder="type username"
+        value={formik.values.username}
+        onChangeText={formik.handleChange('username')}
       />
-      {formik.touched.account && formik.errors.account && (
-        <Text style={{ color: 'red' }}>{formik.errors.account}</Text>
+      {formik.touched.username && formik.errors.username && (
+        <Text style={{ color: 'red' }}>{formik.errors.username}</Text>
       )}
       <TextInput
         style={responsiveStyleInput(formik.errors.password)}
