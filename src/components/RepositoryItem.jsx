@@ -1,8 +1,42 @@
-import { Image, StyleSheet, View } from 'react-native';
+import * as Linking from 'expo-linking';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { useLocation } from 'react-router-native';
 import theme from '../theme';
 import Text from './CustomText';
 
 const RepositoryItem = ({ item }) => {
+  const pathname = useLocation().pathname;
+
+  const GithubBTN = () => {
+    if (pathname.includes(`${item.id}`)) {
+      const inlineStyle = {
+        width: 120,
+        backgroundColor: theme.colors.primary,
+      };
+
+      return (
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+          }}
+        >
+          <Pressable
+            style={inlineStyle}
+            onPress={() => Linking.openURL(item.url)}
+          >
+            <Text style={{ color: 'white', textAlign: 'center' }}>
+              Open in Github
+            </Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   const styles = StyleSheet.create({
     container: {
       paddingTop: 50,
@@ -19,7 +53,6 @@ const RepositoryItem = ({ item }) => {
     },
   });
 
-  let isFloat = true;
   const FormatDigits = (param) => {
     if (param >= 1000) {
       const a = Math.floor(param / 1000);
@@ -27,7 +60,6 @@ const RepositoryItem = ({ item }) => {
 
       return Number(String(`${a}.${b}`));
     }
-    isFloat = false;
 
     return param;
   };
@@ -36,6 +68,7 @@ const RepositoryItem = ({ item }) => {
 
   return (
     <View
+      testID="repositoryItem"
       style={{
         display: 'flex',
         backgroundColor: 'white',
@@ -89,6 +122,7 @@ const RepositoryItem = ({ item }) => {
           <Text style={{ color: 'gray' }}>Ratings</Text>
         </View>
       </View>
+      <GithubBTN />
     </View>
   );
 };

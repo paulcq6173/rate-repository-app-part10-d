@@ -1,49 +1,34 @@
+import { useMutation } from '@apollo/client';
 import { useFormik } from 'formik';
 import { Pressable, TextInput, View } from 'react-native';
 import { useNavigate } from 'react-router-native';
 import * as yup from 'yup';
+import { CREATE_USER } from '../../graphql/queries';
 import useSignIn from '../../hooks/useSignIn';
 import theme from '../../theme';
 import Text from '../CustomText';
 
 const validationSchema = yup.object({
-  username: yup.string().required('Username is required'),
-  password: yup.string().required('Password is required'),
+  username: yup.string().min(1).max(30).required('Username is required'),
+  password: yup.string().min(5).max(50).required('Password is required'),
+  passwordConfirm: yup
+    .string()
+    .required('Password confirm is required')
+    .min(5)
+    .max(50)
+    .oneOf([yup.ref('password'), null], 'Passwords must match'),
 });
 
 const initialValues = {
   username: '',
   password: '',
+  passwordConfirm: '',
 };
 
-/**
- * Container for testing demand.
- *
- * We need separate component from origin one.
- * Because useHook's side-effect will lead to status re-rendering
- * @see src/components/RepositoryList
- */
-const LoginFormContainer = ({ signIn }) => {
+const RegisterForm = () => {
+  const [mutate] = useMutation(CREATE_USER);
+  const [signIn] = useSignIn();
   const navigate = useNavigate();
-
-  const onSubmit = async (values) => {
-    const { username, password } = values;
-
-    try {
-      const { data } = await signIn({ username, password });
-      console.log(data);
-
-      navigate('/');
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-    onSubmit,
-  });
 
   const responsiveStyleInput = (isError) => {
     const inlineStyleInput = {
@@ -60,6 +45,26 @@ const LoginFormContainer = ({ signIn }) => {
     }
     return inlineStyleInput;
   };
+
+  const onSubmit = async (values) => {
+    const { username, password } = values;
+    const user = { username, password };
+
+    try {
+      await mutate({ variables: { user } });
+      await signIn({ username, password });
+
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    onSubmit,
+  });
 
   return (
     <View
@@ -90,6 +95,16 @@ const LoginFormContainer = ({ signIn }) => {
       {formik.touched.password && formik.errors.password && (
         <Text style={{ color: 'red' }}>{formik.errors.password}</Text>
       )}
+      <TextInput
+        style={responsiveStyleInput(formik.errors.passwordConfirm)}
+        placeholder="type password again"
+        placeholderTextColor={'gray'}
+        value={formik.values.passwordConfirm}
+        onChangeText={formik.handleChange('passwordConfirm')}
+      />
+      {formik.touched.passwordConfirm && formik.errors.passwordConfirm && (
+        <Text style={{ color: 'red' }}>{formik.errors.passwordConfirm}</Text>
+      )}
       <Pressable onPress={formik.handleSubmit}>
         <Text
           style={{
@@ -99,17 +114,11 @@ const LoginFormContainer = ({ signIn }) => {
             backgroundColor: theme.colors.primary,
           }}
         >
-          Log in
+          Sign up
         </Text>
       </Pressable>
     </View>
   );
 };
 
-const LoginForm = () => {
-  const [signIn] = useSignIn();
-
-  return <LoginFormContainer signIn={signIn} />;
-};
-
-export default LoginForm;
+export default RegisterForm;

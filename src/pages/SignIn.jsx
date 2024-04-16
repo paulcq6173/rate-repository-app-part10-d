@@ -1,15 +1,15 @@
-import { Link } from 'react-router-native';
+import { View } from 'react-native';
 import Text from '../components/CustomText';
 import LoginForm from '../components/forms/LoginForm';
 
 const SignIn = () => {
   return (
-    <>
-      <Link to="/">
-        <Text>Back to Home</Text>
-      </Link>
+    <View>
+      <View style={{ alignItems: 'center' }}>
+        <Text style={{ fontWeight: 800 }}>Sign in</Text>
+      </View>
       <LoginForm />
-    </>
+    </View>
   );
 };
 

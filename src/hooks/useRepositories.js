@@ -1,25 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const useRepositories = () => {
-  const [repositories, setRepositories] = useState();
-  const [loading, setLoading] = useState(false);
+  const [label, setLabel] = useState('Latest');
+  const [option, setOption] = useState({
+    orderBy: 'CREATED_AT',
+    orderDirection: 'DESC',
+  });
 
-  const fetchRepositories = async () => {
-    setLoading(true);
+  const onChange = (value) => {
+    setLabel(value);
 
-    // Replace the IP address part with your own IP address!
-    const response = await fetch('http://192.168.1.102:5000/api/repositories');
-    const json = await response.json();
-
-    setLoading(false);
-    setRepositories(json);
+    switch (value) {
+      case 'Latest':
+        setOption({
+          orderBy: 'CREATED_AT',
+          orderDirection: 'DESC',
+        });
+        break;
+      case 'Highest rated':
+        setOption({
+          orderBy: 'RATING_AVERAGE',
+          orderDirection: 'DESC',
+        });
+        break;
+      case 'Lowest rated':
+        setOption({
+          orderBy: 'RATING_AVERAGE',
+          orderDirection: 'ASC',
+        });
+        break;
+    }
   };
 
-  useEffect(() => {
-    fetchRepositories();
-  }, []);
-
-  return { repositories, loading, refetch: fetchRepositories };
+  return { option, label, onChange };
 };
 
 export default useRepositories;

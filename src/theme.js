@@ -24,6 +24,17 @@ const theme = {
     normal: 400,
     bold: 700,
   },
+  roundBlue: {
+    display: 'flex',
+    width: 50,
+    height: 50,
+    margin: 5,
+    borderColor: 'blue',
+    borderWidth: 2,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 };
 
 export default theme;
